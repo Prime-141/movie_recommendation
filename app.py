@@ -10,15 +10,230 @@ TMDB_IMG = "https://image.tmdb.org/t/p/w500"
 st.set_page_config(page_title="Movie Recommender", page_icon="🎬", layout="wide")
 
 # =============================
-# STYLES (minimal modern)
+# STYLES (Plex-inspired dark theme)
 # =============================
 st.markdown(
     """
 <style>
-.block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1400px; }
-.small-muted { color:#6b7280; font-size: 0.92rem; }
-.movie-title { font-size: 0.9rem; line-height: 1.15rem; height: 2.3rem; overflow: hidden; }
-.card { border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; padding: 14px; background: rgba(255,255,255,0.7); }
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+
+/* ---------- Tokens ---------- */
+:root {
+  --px-bg: #0f0f10;
+  --px-surface: #19191b;
+  --px-surface-2: #232326;
+  --px-gold: #e5a00d;
+  --px-gold-light: #f5b82e;
+  --px-text: #f2f2f2;
+  --px-muted: #9b9ba3;
+  --px-border: #2c2c30;
+  --font-display: 'Outfit', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+/* ---------- Typography ---------- */
+.stApp,
+.stApp p, .stApp label, .stApp li, .stApp input, .stApp button, .stApp textarea,
+.stApp [data-baseweb="select"], .stMarkdown {
+  font-family: var(--font-body);
+}
+.stApp h1, .stApp h2, .stApp h3, .stApp h4,
+.movie-title, [data-testid="stSidebar"] h2 {
+  font-family: var(--font-display);
+}
+
+/* ---------- Page shell ---------- */
+.stApp {
+  background:
+    radial-gradient(1100px 500px at 15% -10%, rgba(229,160,13,0.14), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(80,70,140,0.18), transparent 60%),
+    var(--px-bg);
+  color: var(--px-text);
+}
+header[data-testid="stHeader"] { background: transparent; }
+#MainMenu, footer { visibility: hidden; }
+.block-container { padding-top: 2rem; padding-bottom: 4rem; max-width: 1500px; }
+.stApp p, .stApp label, .stApp li { color: var(--px-text); }
+.stApp [data-testid="stCaptionContainer"] { color: var(--px-muted); }
+
+/* ---------- Hero header ---------- */
+.stApp h1 {
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -2px;
+  padding: 1rem 0 0.2rem 0;
+  max-width: 900px;
+}
+.stApp h1::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 5px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: var(--px-gold);
+}
+.small-muted { color: var(--px-muted) !important; font-size: 1rem; max-width: 720px; }
+.card .small-muted { font-size: 0.98rem; padding: 3px 0; }
+
+/* ---------- Section headings with trailing rule ---------- */
+.stApp h2, .stApp h3, .stApp h4 { color: #ffffff !important; font-weight: 700; }
+.stApp h3 {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 1.6rem;
+  letter-spacing: -0.5px;
+  margin-top: 1rem;
+}
+.stApp h3::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--px-border), transparent);
+}
+.stApp h4 { font-size: 1.2rem; margin-top: 1.4rem; color: #e6e6e9 !important; letter-spacing: -0.2px; }
+.stApp hr { border-color: transparent; height: 1px; margin: 1.6rem 0; }
+
+/* ---------- Search: big centered pill ---------- */
+[data-testid="stTextInput"] { max-width: 760px; }
+[data-testid="stTextInput"] input {
+  background: var(--px-surface);
+  color: #ffffff;
+  border: 1px solid var(--px-border);
+  border-radius: 999px;
+  padding: 18px 28px;
+  font-size: 1.15rem;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+[data-testid="stTextInput"] input:focus {
+  border-color: var(--px-gold);
+  box-shadow: 0 0 0 3px rgba(229,160,13,0.22), 0 10px 30px rgba(0,0,0,0.35);
+}
+[data-testid="stTextInput"] input::placeholder { color: #6f6f78; }
+[data-testid="stTextInput"] label p { color: var(--px-muted) !important; font-size: 0.9rem; }
+
+/* ---------- Select boxes ---------- */
+[data-baseweb="select"] > div {
+  background: var(--px-surface);
+  border: 1px solid var(--px-border);
+  border-radius: 12px;
+  color: #ffffff;
+}
+[data-baseweb="select"] > div:hover { border-color: var(--px-gold); }
+[data-baseweb="select"] svg { fill: var(--px-muted); }
+[data-baseweb="popover"] ul { background: var(--px-surface-2); }
+[data-baseweb="popover"] li:hover { background: #333338; }
+
+/* ---------- Buttons (gold pill) ---------- */
+.stButton > button {
+  width: 100%;
+  background: var(--px-gold);
+  color: #111111;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 0.4rem 1rem;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.stButton > button:hover { background: var(--px-gold-light); color: #111111; border: none; transform: translateY(-1px); }
+.stButton > button:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+.stButton > button p { color: #111111 !important; font-family: var(--font-display); }
+
+/* ---------- Poster tiles (layout) ---------- */
+[data-testid="stHorizontalBlock"] { gap: 1.1rem; }
+
+/* each poster column becomes a tile */
+[data-testid="stColumn"]:has(.movie-title) {
+  position: relative;
+  background: var(--px-surface);
+  border: 1px solid var(--px-border);
+  border-radius: 16px;
+  padding: 8px 8px 10px 8px;
+  margin-bottom: 0.8rem;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+[data-testid="stColumn"]:has(.movie-title) [data-testid="stVerticalBlock"] { gap: 0.4rem; }
+[data-testid="stColumn"]:has(.movie-title):hover {
+  transform: translateY(-6px);
+  border-color: var(--px-gold);
+  box-shadow: 0 18px 36px rgba(0,0,0,0.6);
+}
+
+/* Open button floats over the poster and shows on hover */
+[data-testid="stColumn"]:has(.movie-title) .stButton {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: calc(10px + 2.4rem + 0.4rem + 14px);
+  z-index: 3;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+[data-testid="stColumn"]:has(.movie-title):hover .stButton,
+[data-testid="stColumn"]:has(.movie-title) .stButton:focus-within {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (hover: none) {
+  [data-testid="stColumn"]:has(.movie-title) .stButton { opacity: 1; transform: none; }
+}
+
+[data-testid="stImage"] img {
+  border-radius: 11px;
+  display: block;
+  box-shadow: none;
+}
+.movie-title {
+  font-size: 0.95rem;
+  line-height: 1.2rem;
+  height: 2.4rem;
+  overflow: hidden;
+  font-weight: 600;
+  color: #ececef;
+  padding: 0 4px;
+}
+
+/* ---------- Detail view ---------- */
+.card {
+  border: 1px solid var(--px-border);
+  border-radius: 20px;
+  padding: 26px;
+  background: linear-gradient(160deg, rgba(35,35,38,0.95), rgba(20,20,22,0.95));
+}
+.card h2 {
+  margin-top: 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+}
+.card h3::after { display: none; }
+.card [data-testid="stImage"] img { border-radius: 14px; box-shadow: 0 14px 34px rgba(0,0,0,0.6); }
+
+/* ---------- Sidebar ---------- */
+[data-testid="stSidebar"] {
+  background: #0a0a0b;
+  border-right: 1px solid var(--px-border);
+}
+[data-testid="stSidebar"] h2 { color: var(--px-gold) !important; font-weight: 800; letter-spacing: -0.5px; }
+[data-testid="stSidebar"] h3 { font-size: 1.05rem; }
+[data-testid="stSidebar"] h3::after { display: none; }
+[data-testid="stSlider"] [role="slider"] { background: var(--px-gold); }
+
+/* ---------- Alerts ---------- */
+[data-testid="stAlert"] { border-radius: 12px; background: var(--px-surface); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .block-container { padding-top: 1rem; }
+  [data-testid="stColumn"]:has(.movie-title) { padding: 6px 6px 8px 6px; }
+}
 </style>
 """,
     unsafe_allow_html=True,
